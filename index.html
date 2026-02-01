@@ -336,7 +336,10 @@
             color: black;
         }
 
-        @page { size: A4; margin: 15mm; }
+        @page { 
+            size: A4; 
+            margin: 20mm;
+        }
         
         @media (max-width: 768px) {
             .main-content {
@@ -368,18 +371,19 @@
             .btn {
                 width: 100%;
                 justify-content: center;
+                padding: 12px 15px;
             }
             
             h1 {
                 font-size: 1.4rem;
             }
-            
-            .btn {
-                padding: 12px 15px;
-            }
         }
         
         @media print {
+            body {
+                background-color: white;
+            }
+            
             .header-logo img {
                 filter: none !important;
                 -webkit-filter: none !important;
@@ -389,23 +393,45 @@
                 max-height: 160px !important;
             }
 
+            header {
+                background: linear-gradient(135deg, var(--primary-color), #1a2530) !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                color-adjust: exact;
+            }
+
             .header-content {
-                border-bottom: 1px solid #333 !important;
-                padding-bottom: 10px;
-                margin-bottom: 20px;
+                border-bottom: 2px solid #2c3e50 !important;
+                padding-bottom: 15px;
+                margin-bottom: 25px;
             }
 
             .slogan {
-                color: #333 !important;
-                border-left: 3px solid #333 !important;
+                color: white !important;
+                border-left: 3px solid var(--secondary-color) !important;
             }
 
             .date-display {
-                color: #333 !important;
+                color: white !important;
+            }
+
+            .summary-section {
+                background-color: #ecf0f1 !important;
+                border: 2px solid var(--secondary-color) !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .activity-item {
+                background-color: #f9f9f9 !important;
+                border-left: 4px solid var(--secondary-color) !important;
+                page-break-inside: avoid;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }
 
             /* Ocultar controles e elementos interativos no print */
-            .form-section, .export-options, .btn {
+            .form-section, .export-options, .btn, .activity-actions {
                 display: none !important;
             }
 
@@ -953,43 +979,48 @@
             
             // Configurações do documento
             const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
             const margin = 15;
             let yPosition = margin;
             
-            // Adicionar logo da empresa (posicionada um pouco mais acima)
+            // Cores personalizadas
+            const primaryColor = [44, 62, 80]; // #2c3e50
+            const secondaryColor = [52, 152, 219]; // #3498db
+            const accentColor = [46, 204, 113]; // #2ecc71
+            const lightGray = [236, 240, 241]; // #ecf0f1
+            
+            // ==== CABEÇALHO COM FUNDO COLORIDO ====
+            doc.setFillColor(...primaryColor);
+            doc.rect(0, 0, pageWidth, 45, 'F');
+            
+            // Adicionar logo da empresa no cabeçalho
             try {
                 if (companyLogo.complete && companyLogo.naturalHeight !== 0) {
                     const logoData = await getBase64Image(companyLogo);
-                    // Ajustar o tamanho da logo para caber no PDF
-                    const logoWidth = 30;
+                    const logoWidth = 28;
                     const logoHeight = (companyLogo.naturalHeight / companyLogo.naturalWidth) * logoWidth;
-                    // Subir a logo alguns pontos (sem sair da página)
-                    const logoY = Math.max(5, yPosition - 6);
-
+                    const logoY = 8;
                     doc.addImage(logoData, 'PNG', margin, logoY, logoWidth, logoHeight);
-
-                    // Garantir que o cursor vertical (yPosition) esteja abaixo da logo
-                    yPosition = Math.max(yPosition, logoY + logoHeight + 5);
                 }
             } catch (error) {
                 console.error('Erro ao adicionar logo:', error);
             }
             
-            // Título
-            doc.setFontSize(18);
+            // Título no cabeçalho
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(16);
             doc.setFont(undefined, 'bold');
-            doc.text('RELATÓRIO DE MANUTENÇÃO PLANTA REFRIGERAÇÃO SUBSOLO', pageWidth / 2, yPosition + 10, { align: 'center' });
-            yPosition += 15;
+            doc.text('RELATÓRIO DE MANUTENÇÃO', pageWidth / 2, 15, { align: 'center' });
             
-            // Slogan
-            doc.setFontSize(10);
+            doc.setFontSize(14);
+            doc.text('Planta Refrigeração Subsolo', pageWidth / 2, 23, { align: 'center' });
+            
+            // Slogan no cabeçalho
+            doc.setFontSize(9);
             doc.setFont(undefined, 'italic');
-            doc.text('Camadas Que Cultiva a Vida', pageWidth / 2, yPosition + 5, { align: 'center' });
-            yPosition += 10;
+            doc.text('Camadas Que Cultiva a Vida', pageWidth / 2, 30, { align: 'center' });
             
-            // Data
-            doc.setFontSize(12);
-            doc.setFont(undefined, 'normal');
+            // Data no cabeçalho
             const now = new Date();
             const dateString = now.toLocaleDateString('pt-BR', { 
                 weekday: 'long', 
@@ -997,42 +1028,89 @@
                 month: 'long', 
                 day: 'numeric' 
             });
-            doc.text(`Data: ${dateString}`, margin, yPosition + 15);
-            yPosition += 20;
-            
-            // Resumo
-            doc.setFontSize(14);
-            doc.setFont(undefined, 'bold');
-            doc.text('RESUMO DO DIA', margin, yPosition + 15);
-            yPosition += 8;
-            
-            doc.setFontSize(10);
+            doc.setFontSize(9);
             doc.setFont(undefined, 'normal');
+            doc.text(dateString, pageWidth / 2, 38, { align: 'center' });
             
+            // Resetar cor do texto
+            doc.setTextColor(0, 0, 0);
+            yPosition = 52;
+            
+            // ==== CAIXA DE RESUMO COM BORDAS ====
             const total = activities.length;
             const preventive = activities.filter(a => a.type === 'preventiva').length;
             const corrective = activities.filter(a => a.type === 'corretiva').length;
             const other = total - preventive - corrective;
             
-            doc.text(`Total de Atividades: ${total}`, margin, yPosition + 20);
-            yPosition += 5;
-            doc.text(`Manutenções Preventivas: ${preventive}`, margin, yPosition + 20);
-            yPosition += 5;
-            doc.text(`Manutenções Corretivas: ${corrective}`, margin, yPosition + 20);
-            yPosition += 5;
-            doc.text(`Outras Atividades: ${other}`, margin, yPosition + 20);
-            yPosition += 15;
+            // Fundo da caixa de resumo
+            doc.setFillColor(...lightGray);
+            doc.roundedRect(margin, yPosition, pageWidth - (margin * 2), 28, 2, 2, 'F');
             
-            // Tabela de atividades
+            // Borda da caixa
+            doc.setDrawColor(...secondaryColor);
+            doc.setLineWidth(0.5);
+            doc.roundedRect(margin, yPosition, pageWidth - (margin * 2), 28, 2, 2, 'S');
+            
+            // Título do resumo
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(...primaryColor);
+            doc.text('RESUMO DO DIA', margin + 5, yPosition + 7);
+            
+            // Linha separadora
+            doc.setDrawColor(...secondaryColor);
+            doc.setLineWidth(0.3);
+            doc.line(margin + 5, yPosition + 9, pageWidth - margin - 5, yPosition + 9);
+            
+            // Dados do resumo em grid
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(0, 0, 0);
+            
+            const resumeY = yPosition + 15;
+            const col1X = margin + 8;
+            const col2X = pageWidth / 2 + 5;
+            
+            doc.setFont(undefined, 'bold');
+            doc.text(`Total de Atividades:`, col1X, resumeY);
+            doc.setFont(undefined, 'normal');
+            doc.text(`${total}`, col1X + 42, resumeY);
+            
+            doc.setFont(undefined, 'bold');
+            doc.text(`Manutenções Preventivas:`, col2X, resumeY);
+            doc.setFont(undefined, 'normal');
+            doc.text(`${preventive}`, col2X + 52, resumeY);
+            
+            doc.setFont(undefined, 'bold');
+            doc.text(`Manutenções Corretivas:`, col1X, resumeY + 6);
+            doc.setFont(undefined, 'normal');
+            doc.text(`${corrective}`, col1X + 50, resumeY + 6);
+            
+            doc.setFont(undefined, 'bold');
+            doc.text(`Outras Atividades:`, col2X, resumeY + 6);
+            doc.setFont(undefined, 'normal');
+            doc.text(`${other}`, col2X + 38, resumeY + 6);
+            
+            yPosition += 35;
+            
+            // ==== SEÇÃO DE ATIVIDADES ====
             if (yPosition > 200) {
                 doc.addPage();
                 yPosition = margin;
             }
             
-            doc.setFontSize(14);
+            // Título da seção de atividades
+            doc.setFontSize(13);
             doc.setFont(undefined, 'bold');
-            doc.text('ATIVIDADES REALIZADAS', margin, yPosition + 15);
-            yPosition += 10;
+            doc.setTextColor(...primaryColor);
+            doc.text('ATIVIDADES REALIZADAS', margin, yPosition);
+            
+            // Linha decorativa abaixo do título
+            doc.setDrawColor(...accentColor);
+            doc.setLineWidth(0.8);
+            doc.line(margin, yPosition + 2, pageWidth - margin, yPosition + 2);
+            
+            yPosition += 8;
             
             // Preparar dados para a tabela (larguras responsivas conforme conteúdo)
             const typeNames = {
@@ -1052,9 +1130,9 @@
             const tableAvailableWidth = pageWidth - margin * 2;
 
             // Larguras fixas aproximadas para colunas pequenas
-            const colHorario = 20;
-            const colTecnico = 25;
-            const colEquip = 28;
+            const colHorario = 22;
+            const colTecnico = 28;
+            const colEquip = 30;
             const colTipo = 25;
 
             const fixedWidth = colHorario + colTecnico + colEquip + colTipo;
@@ -1093,23 +1171,68 @@
                 ];
             });
 
-            // Adicionar tabela com estilos responsivos
+            // Adicionar tabela com estilos aprimorados
             doc.autoTable({
-                startY: yPosition + 15,
+                startY: yPosition,
                 head: [['Horário', 'Equipe', 'Equipamento', 'Tipo', 'Descrição', 'Pendência']],
                 body: tableData,
                 margin: { left: margin, right: margin },
-                styles: { fontSize: 8, cellPadding: 3, overflow: 'linebreak', valign: 'top' },
-                headStyles: { fillColor: [52, 152, 219], textColor: 255 },
-                alternateRowStyles: { fillColor: [236, 240, 241] },
+                styles: { 
+                    fontSize: 8.5, 
+                    cellPadding: 4, 
+                    overflow: 'linebreak', 
+                    valign: 'top',
+                    lineColor: [200, 200, 200],
+                    lineWidth: 0.1
+                },
+                headStyles: { 
+                    fillColor: secondaryColor,
+                    textColor: [255, 255, 255],
+                    fontSize: 9,
+                    fontStyle: 'bold',
+                    halign: 'center',
+                    cellPadding: 5
+                },
+                alternateRowStyles: { 
+                    fillColor: [249, 249, 249]
+                },
+                rowStyles: {
+                    fillColor: [255, 255, 255]
+                },
                 tableWidth: 'auto',
                 columnStyles: {
-                    0: { cellWidth: colHorario },
+                    0: { cellWidth: colHorario, halign: 'center' },
                     1: { cellWidth: colTecnico },
-                    2: { cellWidth: colEquip },
-                    3: { cellWidth: colTipo },
+                    2: { cellWidth: colEquip, fontStyle: 'bold' },
+                    3: { cellWidth: colTipo, halign: 'center' },
                     4: { cellWidth: descColWidth, wrapText: true },
                     5: { cellWidth: pendColWidth, wrapText: true }
+                },
+                didDrawPage: function(data) {
+                    // Adicionar rodapé em cada página
+                    const pageCount = doc.internal.getNumberOfPages();
+                    const currentPage = doc.internal.getCurrentPageInfo().pageNumber;
+                    
+                    // Linha superior do rodapé
+                    doc.setDrawColor(...primaryColor);
+                    doc.setLineWidth(0.5);
+                    doc.line(margin, pageHeight - 15, pageWidth - margin, pageHeight - 15);
+                    
+                    // Texto do rodapé
+                    doc.setFontSize(8);
+                    doc.setTextColor(100, 100, 100);
+                    doc.setFont(undefined, 'normal');
+                    
+                    // Data e hora de geração
+                    const footerDate = new Date().toLocaleString('pt-BR');
+                    doc.text(`Gerado em: ${footerDate}`, margin, pageHeight - 10);
+                    
+                    // Número da página
+                    doc.text(`Página ${currentPage} de ${pageCount}`, pageWidth - margin - 20, pageHeight - 10);
+                    
+                    // Nome da empresa/sistema
+                    doc.setFont(undefined, 'italic');
+                    doc.text('Stratos Sistemas', pageWidth / 2, pageHeight - 10, { align: 'center' });
                 }
             });
             
