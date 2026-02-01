@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Manutenção Elétrica</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary-color), #1a2530);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .header-logo {
+            width: 120px;
+            height: 120px;
+            margin-right: 150px;
+            flex-shrink: 0;
+        }
+        
+        .header-logo img {
+            width: 200%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .header-text {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .date-display {
+            font-size: 1.2rem;
+            text-align: right;
+            margin-left: auto;
+        }
+        
+        
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        
+        .slogan {
+            font-size: 1.1rem;
+            font-weight: 300;
+            opacity: 0.9;
+            font-style: italic;
+            border-left: 3px solid var(--secondary-color);
+            padding-left: 10px;
+            margin-top: 5px;
+        }
+        
+        .date-display {
+            font-size: 1.2rem;
+            text-align: right;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .form-section, .report-section {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .btn-primary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-danger {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+        
+        .activity-list {
+            margin-top: 20px;
+        }
+        
+        .activity-item {
+            background-color: var(--light-color);
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--secondary-color);
+            transition: transform 0.2s;
+        }
+        
+        .activity-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .activity-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .activity-time {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .activity-equipment {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .activity-description {
+            margin-bottom: 10px;
+        }
+        
+        .activity-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .summary-section {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: var(--light-color);
+            border-radius: 4px;
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .export-options {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            color: white;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .notification.success {
+            background-color: var(--success-color);
+        }
+        
+        .notification.error {
+            background-color: var(--accent-color);
+        }
+        
+        .notification.show {
+            opacity: 1;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            
+            .header-text, .date-display {
+                text-align: center;
+            }
+            
+            .slogan {
+                border-left: none;
+                padding-left: 0;
+                border-top: 2px solid var(--secondary-color);
+                padding-top: 5px;
+                margin-top: 10px;
+            }
+            
+            .export-options {
+                flex-direction: column;
+            }
+        }
+        
+        @media print {
+            .header-logo img {
+                filter: none !important;
+                -webkit-filter: none !important;
+                width: auto !important;
+                height: auto !important;
+                max-width: 160px !important;
+                max-height: 160px !important;
+            }
+
+            .header-content {
+                border-bottom: 1px solid #333 !important;
+                padding-bottom: 10px;
+                margin-bottom: 20px;
+            }
+
+            .slogan {
+                color: #333 !important;
+                border-left: 3px solid #333 !important;
+            }
+
+            .date-display {
+                color: #333 !important;
+            }
+
+            /* Ocultar controles e elementos interativos no print */
+            .form-section, .export-options, .btn {
+                display: none !important;
+            }
+
+            .main-content {
+                grid-template-columns: 1fr !important;
+            }
+
+            .report-section {
+                box-shadow: none !important;
+            }
+            
+            .btn {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="notification" class="notification"></div>
+    
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="header-logo">
+                    <img src="stratos.png" alt="Logo Stratos" id="company-logo">
+                </div>
+                
+                <div class="header-text">
+                    <h1>Relatório de Atividade Diária - Manutenção Elétrica</h1>
+                    <div class="slogan">Camadas Que Cultiva a Vida</div>
+                </div>
+                <div class="date-display" id="current-date">Carregando data...</div>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="main-content">
+            <section class="form-section">
+                <h2>Registrar Atividade</h2>
+                <form id="activity-form">
+                    <div class="form-group">
+                        <label for="technician">Técnico Responsável</label>
+                        <input type="text" id="technician" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="time">Horário</label>
+                        <input type="time" id="time" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="equipment">Equipamento/Sistema</label>
+                        <input type="text" id="equipment" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="activity-type">Tipo de Atividade</label>
+                        <select id="activity-type" required>
+                            <option value="">Selecione...</option>
+                            <option value="preventiva">Manutenção Preventiva</option>
+                            <option value="corretiva">Manutenção Corretiva</option>
+                            <option value="preditiva">Manutenção Preditiva</option>
+                            <option value="instalacao">Instalação</option>
+                            <option value="inspecao">Inspeção</option>
+                            <option value="outro">Outro</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="description">Descrição da Atividade</label>
+                        <textarea id="description" required placeholder="Descreva detalhadamente a atividade realizada..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="observations">Observações</label>
+                        <textarea id="observations" placeholder="Observações relevantes, recomendações, próximos passos..."></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 5V19M5 12H19" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        Adicionar Atividade
+                    </button>
+                </form>
+            </section>
+            
+            <section class="report-section">
+                <h2>Relatório do Dia</h2>
+                <div class="activity-list" id="activity-list">
+                    <!-- As atividades serão inseridas aqui via JavaScript -->
+                </div>
+                
+                <div class="summary-section">
+                    <h3>Resumo do Dia</h3>
+                    <div class="summary-item">
+                        <span>Total de Atividades:</span>
+                        <span id="total-activities">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Preventivas:</span>
+                        <span id="preventive-count">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Corretivas:</span>
+                        <span id="corrective-count">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Outras:</span>
+                        <span id="other-count">0</span>
+                    </div>
+                </div>
+                
+                <div class="export-options">
+                    <button class="btn btn-success" id="export-pdf">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M14 2V8H20" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M16 13H8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M16 17H8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M10 9H9H8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Exportar PDF
+                    </button>
+                    <button class="btn btn-primary" id="print-report">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6 9V2H18V9" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M6 18H4C3.46957 18 2.96086 17.7893 2.58579 17.4142C2.21071 17.0391 2 16.5304 2 16V11C2 10.4696 2.21071 9.96086 2.58579 9.58579C2.96086 9.21071 3.46957 9 4 9H20C20.5304 9 21.0391 9.21071 21.4142 9.58579C21.7893 9.96086 22 10.4696 22 11V16C22 16.5304 21.7893 17.0391 21.4142 17.4142C20.96086 17.7893 20.5304 18 20 18H18" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M18 14H6V22H18V14Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Imprimir Relatório
+                    </button>
+                    <button class="btn btn-danger" id="clear-report">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 6H5H21" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M10 11V17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M14 11V17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Limpar Relatório
+                    </button>
+                </div>
+            </section>
+        </div>
+    </div>
+
+
+    <script>
+        // Elementos DOM
+        const currentDateElement = document.getElementById('current-date');
+        const activityForm = document.getElementById('activity-form');
+        const activityList = document.getElementById('activity-list');
+        const totalActivitiesElement = document.getElementById('total-activities');
+        const preventiveCountElement = document.getElementById('preventive-count');
+        const correctiveCountElement = document.getElementById('corrective-count');
+        const otherCountElement = document.getElementById('other-count');
+        const exportPdfButton = document.getElementById('export-pdf');
+        const printReportButton = document.getElementById('print-report');
+        const clearReportButton = document.getElementById('clear-report');
+        const notification = document.getElementById('notification');
+        const companyLogo = document.getElementById('company-logo');
+
+        // Array para armazenar as atividades
+        let activities = JSON.parse(localStorage.getItem('maintenanceActivities')) || [];
+
+        // Índice do item atualmente em edição (ou null)
+        let editingIndex = null;
+        
+        // Atualizar data atual
+        function updateCurrentDate() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            currentDateElement.textContent = now.toLocaleDateString('pt-BR', options);
+        }
+        
+        // Atualizar contadores
+        function updateCounters() {
+            const total = activities.length;
+            const preventive = activities.filter(a => a.type === 'preventiva').length;
+            const corrective = activities.filter(a => a.type === 'corretiva').length;
+            const other = total - preventive - corrective;
+            
+            totalActivitiesElement.textContent = total;
+            preventiveCountElement.textContent = preventive;
+            correctiveCountElement.textContent = corrective;
+            otherCountElement.textContent = other;
+        }
+        
+        // Renderizar lista de atividades (com suporte a edição inline)
+        function renderActivities() {
+            activityList.innerHTML = '';
+            
+            if (activities.length === 0) {
+                activityList.innerHTML = '<p>Nenhuma atividade registrada hoje.</p>';
+                return;
+            }
+            
+            // Ordenar atividades por horário
+            activities.sort((a, b) => a.time.localeCompare(b.time));
+            
+            activities.forEach((activity, index) => {
+                const activityElement = document.createElement('div');
+                activityElement.className = 'activity-item';
+                
+                // Mapear tipos para nomes amigáveis
+                const typeNames = {
+                    'preventiva': 'Manutenção Preventiva',
+                    'corretiva': 'Manutenção Corretiva',
+                    'preditiva': 'Manutenção Preditiva',
+                    'instalacao': 'Instalação',
+                    'inspecao': 'Inspeção',
+                    'outro': 'Outro'
+                };
+
+                // Se este item está em edição renderiza campos editáveis
+                if (index === editingIndex) {
+                    activityElement.innerHTML = `
+                        <div class="activity-header">
+                            <input type="time" id="edit-time-${index}" value="${activity.time || ''}" required>
+                            <select id="edit-type-${index}">
+                                <option value="">Selecione...</option>
+                                <option value="preventiva" ${activity.type === 'preventiva' ? 'selected' : ''}>Manutenção Preventiva</option>
+                                <option value="corretiva" ${activity.type === 'corretiva' ? 'selected' : ''}>Manutenção Corretiva</option>
+                                <option value="preditiva" ${activity.type === 'preditiva' ? 'selected' : ''}>Manutenção Preditiva</option>
+                                <option value="instalacao" ${activity.type === 'instalacao' ? 'selected' : ''}>Instalação</option>
+                                <option value="inspecao" ${activity.type === 'inspecao' ? 'selected' : ''}>Inspeção</option>
+                                <option value="outro" ${activity.type === 'outro' ? 'selected' : ''}>Outro</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="edit-equipment-${index}" placeholder="Equipamento/Sistema" value="${activity.equipment || ''}">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="edit-technician-${index}" placeholder="Técnico" value="${activity.technician || ''}">
+                        </div>
+                        <div class="form-group">
+                            <textarea id="edit-description-${index}" placeholder="Descrição">${activity.description || ''}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <textarea id="edit-observations-${index}" placeholder="Observações">${activity.observations || ''}</textarea>
+                        </div>
+                        <div class="activity-actions">
+                            <button class="btn btn-success" onclick="saveEditedActivity(${index})">Salvar</button>
+                            <button class="btn btn-danger" onclick="cancelEdit(${index})">Cancelar</button>
+                        </div>
+                    `;
+                } else {
+                    activityElement.innerHTML = `
+                        <div class="activity-header">
+                            <div class="activity-time">${activity.time}</div>
+                            <div class="activity-type">${typeNames[activity.type] || activity.type}</div>
+                        </div>
+                        <div class="activity-equipment">${activity.equipment}</div>
+                        <div class="activity-technician">Técnico: ${activity.technician}</div>
+                        <div class="activity-description">${activity.description}</div>
+                        ${activity.observations ? `<div class="activity-observations"><strong>Observações:</strong> ${activity.observations}</div>` : ''}
+                        <div class="activity-actions">
+                            <button class="btn btn-primary" onclick="editActivity(${index})">
+                                Editar
+                            </button>
+                            <button class="btn btn-danger" onclick="removeActivity(${index})">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 6H5H21" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                Remover
+                            </button>
+                        </div>
+                    `;
+                }
+                
+                activityList.appendChild(activityElement);
+            });
+        }
+        
+        // Adicionar nova atividade
+        function addActivity(event) {
+            event.preventDefault();
+            
+            const technician = document.getElementById('technician').value;
+            const time = document.getElementById('time').value;
+            const equipment = document.getElementById('equipment').value;
+            const type = document.getElementById('activity-type').value;
+            const description = document.getElementById('description').value;
+            const observations = document.getElementById('observations').value;
+            
+            const newActivity = {
+                technician,
+                time,
+                equipment,
+                type,
+                description,
+                observations
+            };
+            
+            activities.push(newActivity);
+            localStorage.setItem('maintenanceActivities', JSON.stringify(activities));
+            
+            // Limpar formulário
+            activityForm.reset();
+            
+            // Definir edição imediata para o item recém-adicionado (último índice)
+            editingIndex = activities.length - 1;
+            
+            // Atualizar interface
+            renderActivities();
+            updateCounters();
+            
+            showNotification('Atividade adicionada. Editando imediatamente...', 'success');
+        }
+        
+        // Editar atividade (abrir em modo edição)
+        function editActivity(index) {
+            editingIndex = index;
+            renderActivities();
+        }
+
+        // Salvar edição
+        function saveEditedActivity(index) {
+            const technician = document.getElementById(`edit-technician-${index}`).value;
+            const time = document.getElementById(`edit-time-${index}`).value;
+            const equipment = document.getElementById(`edit-equipment-${index}`).value;
+            const type = document.getElementById(`edit-type-${index}`).value;
+            const description = document.getElementById(`edit-description-${index}`).value;
+            const observations = document.getElementById(`edit-observations-${index}`).value;
+            
+            // Validação mínima
+            if (!time || !technician || !equipment || !type || !description) {
+                showNotification('Preencha os campos obrigatórios antes de salvar.', 'error');
+                return;
+            }
+            
+            activities[index] = {
+                technician,
+                time,
+                equipment,
+                type,
+                description,
+                observations
+            };
+            
+            localStorage.setItem('maintenanceActivities', JSON.stringify(activities));
+            editingIndex = null;
+            renderActivities();
+            updateCounters();
+            showNotification('Atividade atualizada com sucesso!', 'success');
+        }
+
+        // Cancelar edição
+        function cancelEdit(index) {
+            editingIndex = null;
+            renderActivities();
+            showNotification('Edição cancelada.', 'error');
+        }
+        
+        // Remover atividade
+        function removeActivity(index) {
+            if (confirm('Tem certeza que deseja remover esta atividade?')) {
+                activities.splice(index, 1);
+                localStorage.setItem('maintenanceActivities', JSON.stringify(activities));
+                editingIndex = null;
+                renderActivities();
+                updateCounters();
+                showNotification('Atividade removida com sucesso!', 'success');
+            }
+        }
+        
+        // Mostrar notificação
+        function showNotification(message, type) {
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Função para converter imagem em base64
+        function getBase64Image(img) {
+            return new Promise((resolve, reject) => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // Definir dimensões do canvas
+                canvas.width = img.naturalWidth;
+                canvas.height = img.naturalHeight;
+                
+                // Desenhar a imagem no canvas
+                ctx.drawImage(img, 0, 0);
+                
+                // Obter a imagem em base64
+                try {
+                    const dataURL = canvas.toDataURL('image/png');
+                    resolve(dataURL);
+                } catch (error) {
+                    reject(error);
+                }
+            });
+        }
+        
+        // Exportar para PDF
+        async function exportToPDF() {
+            // Verificar se existem atividades
+            if (activities.length === 0) {
+                showNotification('Não há atividades para exportar.', 'error');
+                return;
+            }
+            
+            // Inicializar jsPDF
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Configurações do documento
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const margin = 15;
+            let yPosition = margin;
+            
+            // Adicionar logo da empresa
+            try {
+                if (companyLogo.complete && companyLogo.naturalHeight !== 0) {
+                    const logoData = await getBase64Image(companyLogo);
+                    // Ajustar o tamanho da logo para caber no PDF
+                    const logoWidth = 30;
+                    const logoHeight = (companyLogo.naturalHeight / companyLogo.naturalWidth) * logoWidth;
+                    
+                    doc.addImage(logoData, 'PNG', margin, yPosition, logoWidth, logoHeight);
+                }
+            } catch (error) {
+                console.error('Erro ao adicionar logo:', error);
+            }
+            
+            // Título
+            doc.setFontSize(18);
+            doc.setFont(undefined, 'bold');
+            doc.text('RELATÓRIO DE MANUTENÇÃO ELÉTRICA', pageWidth / 2, yPosition + 10, { align: 'center' });
+            yPosition += 15;
+            
+            // Slogan
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'italic');
+            doc.text('Camadas Que Cultiva a Vida', pageWidth / 2, yPosition + 5, { align: 'center' });
+            yPosition += 10;
+            
+            // Data
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'normal');
+            const now = new Date();
+            const dateString = now.toLocaleDateString('pt-BR', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            doc.text(`Data: ${dateString}`, margin, yPosition + 15);
+            yPosition += 20;
+            
+            // Resumo
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.text('RESUMO DO DIA', margin, yPosition + 15);
+            yPosition += 8;
+            
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            
+            const total = activities.length;
+            const preventive = activities.filter(a => a.type === 'preventiva').length;
+            const corrective = activities.filter(a => a.type === 'corretiva').length;
+            const other = total - preventive - corrective;
+            
+            doc.text(`Total de Atividades: ${total}`, margin, yPosition + 20);
+            yPosition += 5;
+            doc.text(`Manutenções Preventivas: ${preventive}`, margin, yPosition + 20);
+            yPosition += 5;
+            doc.text(`Manutenções Corretivas: ${corrective}`, margin, yPosition + 20);
+            yPosition += 5;
+            doc.text(`Outras Atividades: ${other}`, margin, yPosition + 20);
+            yPosition += 15;
+            
+            // Tabela de atividades
+            if (yPosition > 200) {
+                doc.addPage();
+                yPosition = margin;
+            }
+            
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.text('ATIVIDADES REALIZADAS', margin, yPosition + 15);
+            yPosition += 10;
+            
+            // Preparar dados para a tabela
+            const tableData = activities.map(activity => {
+                const typeNames = {
+                    'preventiva': 'Preventiva',
+                    'corretiva': 'Corretiva',
+                    'preditiva': 'Preditiva',
+                    'instalacao': 'Instalação',
+                    'inspecao': 'Inspeção',
+                    'outro': 'Outro'
+                };
+                
+                return [
+                    activity.time,
+                    activity.technician,
+                    activity.equipment,
+                    typeNames[activity.type] || activity.type,
+                    activity.description,
+                    activity.observations || '-'
+                ];
+            });
+            
+            // Adicionar tabela
+            doc.autoTable({
+                startY: yPosition + 15,
+                head: [['Horário', 'Técnico', 'Equipamento', 'Tipo', 'Descrição', 'Observações']],
+                body: tableData,
+                margin: { left: margin, right: margin },
+                styles: { fontSize: 8, cellPadding: 2 },
+                headStyles: { fillColor: [52, 152, 219] },
+                alternateRowStyles: { fillColor: [236, 240, 241] },
+                tableWidth: 'auto',
+                columnStyles: {
+                    0: { cellWidth: 20 },
+                    1: { cellWidth: 25 },
+                    2: { cellWidth: 30 },
+                    3: { cellWidth: 25 },
+                    4: { cellWidth: 50 },
+                    5: { cellWidth: 40 }
+                }
+            });
+            
+            // Salvar o PDF
+            const fileName = `relatorio_manutencao_${now.toISOString().split('T')[0]}.pdf`;
+            doc.save(fileName);
+            
+            showNotification('PDF gerado com sucesso!', 'success');
+        }
+        
+        // Imprimir relatório
+        function printReport() {
+            if (activities.length === 0) {
+                showNotification('Não há atividades para imprimir.', 'error');
+                return;
+            }
+            window.print();
+        }
+        
+        // Limpar relatório
+        function clearReport() {
+            if (confirm('Tem certeza que deseja limpar todo o relatório do dia?')) {
+                activities = [];
+                localStorage.removeItem('maintenanceActivities');
+                renderActivities();
+                updateCounters();
+                showNotification('Relatório limpo com sucesso!', 'success');
+            }
+        }
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCurrentDate();
+            renderActivities();
+            updateCounters();
+            
+            // Event listeners
+            activityForm.addEventListener('submit', addActivity);
+            exportPdfButton.addEventListener('click', exportToPDF);
+            printReportButton.addEventListener('click', printReport);
+            clearReportButton.addEventListener('click', clearReport);
+        });
+        
+        // Tornar funções globais para uso nos event listeners inline
+        window.removeActivity = removeActivity;
+        window.editActivity = editActivity;
+        window.saveEditedActivity = saveEditedActivity;
+        window.cancelEdit = cancelEdit;
+    </script>
+
+</body>
+</html>
